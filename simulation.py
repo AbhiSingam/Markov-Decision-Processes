@@ -31,7 +31,7 @@ def update_state(state, action2):
             return states[i] 
 
 
-startState = (1, 1, 1, 0, 1)
+startState = (4, 0, 3, 1, 1)
 done = False
 while not done:
     print('state: ', tuple(startState), ';action: ', thisAction[tuple(startState)])
