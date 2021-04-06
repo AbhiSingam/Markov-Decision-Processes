@@ -1,10 +1,13 @@
 import numpy as np
 import json
+import pickle
+
 # initializing constants ---
 
 TEAM_NO = 8
 STEP_ERR_ARR = [0.5, 1, 2]
 STEPCOST = -10 / STEP_ERR_ARR[TEAM_NO % 3]
+# STEPCOST = -10
 
 GAMMA = 0.999
 DELTA = 0.001
@@ -103,10 +106,9 @@ def get_prob(state, action):
             state1[posDic['arrow']] = min(3, state1[posDic['arrow']] + 1)
             state2[posDic['arrow']] = min(3, state1[posDic['arrow']] + 2)
             state3[posDic['arrow']] = min(3, state1[posDic['arrow']] + 3)
-
-            for stat in (state1, state2, state3):
-                stat[posDic['mat']] -= 1
-
+            state1[posDic['mat']] -= 1
+            state2[posDic['mat']] -= 1
+            state3[posDic['mat']] -= 1
             ret = [[0.5, 0.35, 0.15], [state1, state2, state3]]
 
     if positionMap[state[0]] == 's':
@@ -119,7 +121,7 @@ def get_prob(state, action):
             ret = [[0.85, 0.15], [successState, failState]]
 
         if action == 'GATHER':
-            successState[posDic['mat']] = min(2, successState[posDic['mat']])
+            successState[posDic['mat']] = min(2, successState[posDic['mat']] + 1)
             ret = [[0.75, 0.25], [successState, failState]]
 
     if positionMap[state[0]] == 'e':
@@ -146,8 +148,11 @@ def get_prob(state, action):
             ret = [[1.0], [successState]]
         if action in 'SHOOT':
             # print(state[posDic['arrow']])
-            for stat in (successState, failState):
-                stat[posDic['arrow']] -= 1
+            # for stat in (successState, failState):
+            #     stat[posDic['arrow']] -= 1
+
+            successState[posDic['arrow']] -= 1
+            failState[posDic['arrow']] -= 1
             successState[posDic['mhealth']] -= 1
             ret = [[0.25, 0.75], [successState, failState]]
 
@@ -178,13 +183,21 @@ def get_prob(state, action):
             temp_prob.append(val * 0.5)
             temp_state.append(states[i])
 
-        attackState[posDic['mstate']] = 0
-        if state[0] in [0, 3]:
-            attackState[posDic['arrow']] = 0
-            attackState[posDic['mhealth']] = min(
-                4, attackState[posDic['mhealth']] + 1)
-        temp_prob.append(0.5)
-        temp_state.append(attackState)
+        # attackState[posDic['mstate']] = 0
+            # attackState[posDic['arrow']] = 0
+
+        for i, _ in enumerate(probs):
+            tState = states[i]
+            if tState[0] in [0, 3]:
+                tState = state
+                tState[posDic['arrow']] = 0
+                tState[posDic['mhealth']] = min(4, tState[posDic['mhealth']] + 1)
+
+            tState[posDic['mstate']] = 0
+
+            temp_prob.append(0.5 * probs[i])
+            temp_state.append(tState)
+
         ret = [temp_prob, temp_state]
 
     return ret
@@ -241,15 +254,17 @@ def val_iter():
             # print(bestInd)
             cur_utils[tuple(state)] = np.max(np.array(utils_state))
             # print(type(bestInd))
-            # print(actionsPos[bestInd])
+            if tuple(state) == (0, 2, 2, 1, 1):
+                print(actionsPos[bestInd])
+                qw = input('')
             cur_actions[tuple(state)] = actionsPos[bestInd]
             # print(actionsPos[bestInd])
             
-        print(cur_actions[(0, 2, 2, 0, 1)])
-        print(cur_actions[(1, 2, 2, 0, 1)])
-        print(cur_actions[(2, 2, 2, 0, 1)])
-        print(cur_actions[(3, 2, 2, 0, 1)])
-        print(cur_actions[(4, 2, 2, 0, 1)])
+        print(cur_actions[(0, 2, 2, 1, 1)])
+        print(cur_actions[(1, 2, 2, 1, 1)])
+        print(cur_actions[(2, 2, 2, 1, 1)])
+        print(cur_actions[(3, 2, 2, 1, 1)])
+        print(cur_actions[(4, 2, 2, 1, 1)])
         hist.append(cur_utils)
         cur_policy.append(cur_actions)
 
@@ -258,11 +273,11 @@ def val_iter():
         itNum += 1
         diff = np.max(np.abs(t1 - t2))
         print(itNum, diff)
-        print('c: ', cur_policy[-1][(0, 2, 2, 0, 1)], hist[-1][((0, 2, 2, 0, 1))])
-        print('n: ', cur_policy[-1][(1, 2, 2, 0, 1)], hist[-1][((1, 2, 2, 0, 1))])
-        print('s: ', cur_policy[-1][(2, 2, 2, 0, 1)], hist[-1][((2, 2, 2, 0, 1))])
-        print('e: ', cur_policy[-1][(3, 2, 2, 0, 1)], hist[-1][((3, 2, 2, 0, 1))])
-        print('w: ', cur_policy[-1][(4, 2, 2, 0, 1)], hist[-1][((4, 2, 2, 0, 1))])
+        print('c: ', cur_policy[-1][(0, 2, 2, 1, 1)], hist[-1][(0, 2, 2, 1, 1)])
+        print('n: ', cur_policy[-1][(1, 2, 2, 1, 1)], hist[-1][(1, 2, 2, 1, 1)])
+        print('s: ', cur_policy[-1][(2, 2, 2, 1, 1)], hist[-1][(2, 2, 2, 1, 1)])
+        print('e: ', cur_policy[-1][(3, 2, 2, 1, 1)], hist[-1][(3, 2, 2, 1, 1)])
+        print('w: ', cur_policy[-1][(4, 2, 2, 1, 1)], hist[-1][(4, 2, 2, 1, 1)])
         if diff < DELTA:
             finished = True
 
@@ -270,5 +285,7 @@ def val_iter():
 if __name__ == "__main__":
     initial = ('W', 0, 0, 'D', 100)
     val_iter()
+    with open('a.pkl', 'wb') as fd:
+        pickle.dump((hist, cur_policy), fd)
     # with open('thing.json', 'a+') as fd:
     #     json.dump(hist, fd, indent=4)
