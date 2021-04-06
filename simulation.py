@@ -1,7 +1,7 @@
 import pickle
 import random
 import numpy
-from task1 import get_prob
+from part_2 import get_prob
 
 with open('a.pkl', 'rb')as fd:
     hist, histActions = pickle.load(fd)
