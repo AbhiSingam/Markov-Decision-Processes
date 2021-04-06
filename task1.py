@@ -143,8 +143,9 @@ def get_prob(state, action):
         if action in ['RIGHT', 'STAY']:
             endpoint = {'STAY': 4, 'RIGHT': 0}
             successState[0] = endpoint[action]
-            ret = [[1.0], [successState, failState]]
+            ret = [[1.0], [successState]]
         if action in 'SHOOT':
+            # print(state[posDic['arrow']])
             for stat in (successState, failState):
                 stat[posDic['arrow']] -= 1
             successState[posDic['mhealth']] -= 1
@@ -243,7 +244,12 @@ def val_iter():
             # print(actionsPos[bestInd])
             cur_actions[tuple(state)] = actionsPos[bestInd]
             # print(actionsPos[bestInd])
-
+            
+        print(cur_actions[(0, 2, 2, 0, 1)])
+        print(cur_actions[(1, 2, 2, 0, 1)])
+        print(cur_actions[(2, 2, 2, 0, 1)])
+        print(cur_actions[(3, 2, 2, 0, 1)])
+        print(cur_actions[(4, 2, 2, 0, 1)])
         hist.append(cur_utils)
         cur_policy.append(cur_actions)
 
@@ -252,12 +258,11 @@ def val_iter():
         itNum += 1
         diff = np.max(np.abs(t1 - t2))
         print(itNum, diff)
-        print(hist[-1][(1, 2, 3, 0, 1)])
-        print('c: ', cur_policy[-1][(0, 2, 3, 0, 1)])
-        print('n: ', cur_policy[-1][(1, 2, 3, 0, 1)])
-        print('s: ', cur_policy[-1][(2, 2, 3, 0, 1)])
-        print('e: ', cur_policy[-1][(3, 2, 3, 0, 1)])
-        print('w: ', cur_policy[-1][(4, 2, 3, 0, 1)])
+        print('c: ', cur_policy[-1][(0, 2, 2, 0, 1)], hist[-1][((0, 2, 2, 0, 1))])
+        print('n: ', cur_policy[-1][(1, 2, 2, 0, 1)], hist[-1][((1, 2, 2, 0, 1))])
+        print('s: ', cur_policy[-1][(2, 2, 2, 0, 1)], hist[-1][((2, 2, 2, 0, 1))])
+        print('e: ', cur_policy[-1][(3, 2, 2, 0, 1)], hist[-1][((3, 2, 2, 0, 1))])
+        print('w: ', cur_policy[-1][(4, 2, 2, 0, 1)], hist[-1][((4, 2, 2, 0, 1))])
         if diff < DELTA:
             finished = True
 
