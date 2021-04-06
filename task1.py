@@ -168,7 +168,7 @@ def get_prob(state, action):
         temp_state = []
         for i, val in enumerate(probs):
             temp_prob.append(val*0.8)
-            temp_state.append(states[i])
+            temp_state.append(states[i].copy())
             rdy = states[i].copy()
             rdy[posDic['mstate']] = 1
             temp_prob.append(val*0.2)
@@ -176,20 +176,35 @@ def get_prob(state, action):
         ret = [temp_prob, temp_state]
 
     else:
+        # probs, states = ret
+        # temp_prob = []
+        # temp_state = []
+        # for i, val in enumerate(probs):
+        #     temp_prob.append(val * 0.5)
+        #     temp_state.append(states[i])
+
+        # attackState[posDic['mstate']] = 0
+        # if state[0] in [0, 3]:
+        #     attackState[posDic['arrow']] = 0
+        #     attackState[posDic['mhealth']] = min(
+        #         4, attackState[posDic['mhealth']] + 1)
+        # temp_prob.append(0.5)
+        # temp_state.append(attackState)
+        # ret = [temp_prob, temp_state]
         probs, states = ret
         temp_prob = []
         temp_state = []
         for i, val in enumerate(probs):
             temp_prob.append(val * 0.5)
-            temp_state.append(states[i])
+            temp_state.append(states[i].copy())
 
         # attackState[posDic['mstate']] = 0
             # attackState[posDic['arrow']] = 0
 
         for i, _ in enumerate(probs):
-            tState = states[i]
+            tState = states[i].copy()
             if tState[0] in [0, 3]:
-                tState = state
+                tState = state.copy()
                 tState[posDic['arrow']] = 0
                 tState[posDic['mhealth']] = min(4, tState[posDic['mhealth']] + 1)
 
@@ -254,9 +269,6 @@ def val_iter():
             # print(bestInd)
             cur_utils[tuple(state)] = np.max(np.array(utils_state))
             # print(type(bestInd))
-            if tuple(state) == (0, 2, 2, 1, 1):
-                print(actionsPos[bestInd])
-                qw = input('')
             cur_actions[tuple(state)] = actionsPos[bestInd]
             # print(actionsPos[bestInd])
             
