@@ -11,7 +11,9 @@ Interpretation of the trace:
   - Maybe choose to gather and craft arrows depending on if MM is ready to attack
   - Hit repeatedly
 
+- Graph for the convergence:
 
+	![graph_part2](/Users/saru/mdl/MDL_Value_Iteration/graph_part2.png)
 
 Simulations:
 
