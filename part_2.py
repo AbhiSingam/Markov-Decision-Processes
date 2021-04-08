@@ -296,7 +296,7 @@ def val_iter():
 if __name__ == "__main__":
     initial = ('W', 0, 0, 'D', 100)
     val_iter()
-    print(cur_policy[3][(4, 0, 0, 1, 3)])
+    # print(cur_policy[3][(4, 0, 0, 1, 3)])
     with open('a.pkl', 'wb') as fd:
         pickle.dump((hist, cur_policy), fd)
     # with open('thing.json', 'a+') as fd:
