@@ -98,7 +98,7 @@ def solve(A, alpha, r):
     
     x_list = []
     for i in x.value:
-        x_list.append(list(i))
+        x_list.append(i[0])
     
     return x, x_list, solution
 
