@@ -509,3 +509,11 @@ Comments:
 - He more often shoots from C when MM is at 25.
 
 - He more often chooses to STAY at N where he'd originally move DOWN
+
+- He plays for short term, rather than the long term goals
+
+	- For example, when he's at south, has full MATS and MM is D and high health, he chooses to GATHER instead of UP to avoid the 0.1 chance the MM becomes R and attacks him before he can leave C.
+
+	---
+
+	

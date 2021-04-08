@@ -4,7 +4,7 @@ import os
 from part_2 import positionMap
 from matplotlib import pyplot as plt
 
-with open('a.pkl', 'rb') as fd:
+with open('a2.pkl', 'rb') as fd:
     hist, actions = pickle.load(fd)
 
 pos = [-1] * 5
@@ -18,7 +18,7 @@ mState = ['D', 'R']
 
 #make outputdir
 os.makedirs('outputs', exist_ok=True)
-path = './outputs/part_2_trace.txt'
+path = './outputs/part_2_task_2.2_trace.txt'
 deltas = []
 
 
