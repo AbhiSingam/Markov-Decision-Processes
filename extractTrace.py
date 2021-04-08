@@ -36,6 +36,9 @@ with open(path, 'w') as fd:
             # print(actions[i][state].astype(str))
             print(' :' + actions[i][state].astype(str) + '=[' + str(round(hist[i][state],2)) + ']', file=fd)
 
-plt.plot(deltas)
+plt.plot(deltas, label='delta')
+plt.legend()
+plt.xlabel('iteration')
+plt.ylabel('diff')
 plt.show()
 print(deltas)
