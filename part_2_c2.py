@@ -67,7 +67,6 @@ def get_prob(state, action):
     # print(type(state))
     successState = state.copy()
     failState = state.copy()
-    attackState = state.copy()
     ret = [[0], [state.copy()]]
 
     if positionMap[state[0]] == 'c':
@@ -131,14 +130,14 @@ def get_prob(state, action):
             ret = [[1.0], [successState]]
 
         if action == 'SHOOT':
-            for stat in (successState, failState):
-                stat[posDic['arrow']] -= 1
-
+            successState[posDic['arrow']] -= 1
+            failState[posDic['arrow']] -= 1
             successState[posDic['mhealth']] -= 1
             ret = [[0.9, 0.1], [successState, failState]]
 
         if action == 'HIT':
-            successState[posDic['mhealth']] -= 2
+            successState[posDic['mhealth']] = max(
+                0, successState[posDic['mhealth']] - 2)
             ret = [[0.2, 0.8], [successState, failState]]
 
     if positionMap[state[0]] == 'w':
@@ -172,7 +171,7 @@ def get_prob(state, action):
             rdy = states[i].copy()
             rdy[posDic['mstate']] = 1
             temp_prob.append(val*0.2)
-            temp_state.append(rdy)
+            temp_state.append(rdy.copy())
         ret = [temp_prob, temp_state]
 
     else:
@@ -203,7 +202,7 @@ def get_prob(state, action):
 
         for i, _ in enumerate(probs):
             tState = states[i].copy()
-            if tState[0] in [0, 3]:
+            if state[0] in [0, 3]:
                 tState = state.copy()
                 tState[posDic['arrow']] = 0
                 tState[posDic['mhealth']] = min(4, tState[posDic['mhealth']] + 1)
@@ -211,7 +210,7 @@ def get_prob(state, action):
             tState[posDic['mstate']] = 0
 
             temp_prob.append(0.5 * probs[i])
-            temp_state.append(tState)
+            temp_state.append(tState.copy())
 
         ret = [temp_prob, temp_state]
 
@@ -242,8 +241,7 @@ def do_action(action, state):
                                     STEPCOST + GAMMA * hist[-1][tuple(states[i])])
         else:
             for i in range(len(probs)):
-                util += probs[i] * (calcReward(states[i], state) +
-                                    GAMMA * hist[-1][tuple(states[i])])
+                util += probs[i] * (calcReward(states[i], state) + GAMMA * hist[-1][tuple(states[i])])
             # print(hist[-1][tuple(states[i])])
 
     else:
@@ -277,11 +275,11 @@ def val_iter():
             cur_actions[tuple(state)] = actionsPos[bestInd]
             # print(actionsPos[bestInd])
             
-        print(cur_actions[(0, 2, 2, 1, 1)])
-        print(cur_actions[(1, 2, 2, 1, 1)])
-        print(cur_actions[(2, 2, 2, 1, 1)])
-        print(cur_actions[(3, 2, 2, 1, 1)])
-        print(cur_actions[(4, 2, 2, 1, 1)])
+        # print(cur_actions[(0, 2, 2, 1, 1)])
+        # print(cur_actions[(1, 2, 2, 1, 1)])
+        # print(cur_actions[(2, 2, 2, 1, 1)])
+        # print(cur_actions[(3, 2, 2, 1, 1)])
+        # print(cur_actions[(4, 2, 2, 1, 1)])
         hist.append(cur_utils)
         cur_policy.append(cur_actions)
 
@@ -290,11 +288,11 @@ def val_iter():
         itNum += 1
         diff = np.max(np.abs(t1 - t2))
         print(itNum, diff)
-        print('c: ', cur_policy[-1][(0, 2, 2, 1, 1)], hist[-1][(0, 2, 2, 1, 1)])
-        print('n: ', cur_policy[-1][(1, 2, 2, 1, 1)], hist[-1][(1, 2, 2, 1, 1)])
-        print('s: ', cur_policy[-1][(2, 2, 2, 1, 1)], hist[-1][(2, 2, 2, 1, 1)])
-        print('e: ', cur_policy[-1][(3, 2, 2, 1, 1)], hist[-1][(3, 2, 2, 1, 1)])
-        print('w: ', cur_policy[-1][(4, 2, 2, 1, 1)], hist[-1][(4, 2, 2, 1, 1)])
+        # print('c: ', cur_policy[-1][(0, 2, 2, 1, 1)], hist[-1][(0, 2, 2, 1, 1)])
+        # print('n: ', cur_policy[-1][(1, 2, 2, 1, 1)], hist[-1][(1, 2, 2, 1, 1)])
+        # print('s: ', cur_policy[-1][(2, 2, 2, 1, 1)], hist[-1][(2, 2, 2, 1, 1)])
+        # print('e: ', cur_policy[-1][(3, 2, 2, 1, 1)], hist[-1][(3, 2, 2, 1, 1)])
+        # print('w: ', cur_policy[-1][(4, 2, 2, 1, 1)], hist[-1][(4, 2, 2, 1, 1)])
         if diff < DELTA:
             finished = True
 

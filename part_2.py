@@ -6,8 +6,8 @@ import pickle
 
 TEAM_NO = 8
 STEP_ERR_ARR = [0.5, 1, 2]
-STEPCOST = -10 / STEP_ERR_ARR[TEAM_NO % 3]
-# STEPCOST = -10
+# STEPCOST = -10 / STEP_ERR_ARR[TEAM_NO % 3]
+STEPCOST = -10
 
 GAMMA = 0.999
 DELTA = 0.001
@@ -67,7 +67,6 @@ def get_prob(state, action):
     # print(type(state))
     successState = state.copy()
     failState = state.copy()
-    attackState = state.copy()
     ret = [[0], [state.copy()]]
 
     if positionMap[state[0]] == 'c':
@@ -131,14 +130,14 @@ def get_prob(state, action):
             ret = [[1.0], [successState]]
 
         if action == 'SHOOT':
-            for stat in (successState, failState):
-                stat[posDic['arrow']] -= 1
-
+            successState[posDic['arrow']] -= 1
+            failState[posDic['arrow']] -= 1
             successState[posDic['mhealth']] -= 1
             ret = [[0.9, 0.1], [successState, failState]]
 
         if action == 'HIT':
-            successState[posDic['mhealth']] -= 2
+            successState[posDic['mhealth']] = max(
+                0, successState[posDic['mhealth']] - 2)
             ret = [[0.2, 0.8], [successState, failState]]
 
     if positionMap[state[0]] == 'w':
@@ -172,7 +171,7 @@ def get_prob(state, action):
             rdy = states[i].copy()
             rdy[posDic['mstate']] = 1
             temp_prob.append(val*0.2)
-            temp_state.append(rdy)
+            temp_state.append(rdy.copy())
         ret = [temp_prob, temp_state]
 
     else:
@@ -203,7 +202,7 @@ def get_prob(state, action):
 
         for i, _ in enumerate(probs):
             tState = states[i].copy()
-            if tState[0] in [0, 3]:
+            if state[0] in [0, 3]:
                 tState = state.copy()
                 tState[posDic['arrow']] = 0
                 tState[posDic['mhealth']] = min(4, tState[posDic['mhealth']] + 1)
@@ -211,7 +210,7 @@ def get_prob(state, action):
             tState[posDic['mstate']] = 0
 
             temp_prob.append(0.5 * probs[i])
-            temp_state.append(tState)
+            temp_state.append(tState.copy())
 
         ret = [temp_prob, temp_state]
 
@@ -297,6 +296,7 @@ def val_iter():
 if __name__ == "__main__":
     initial = ('W', 0, 0, 'D', 100)
     val_iter()
+    print(cur_policy[3][(4, 0, 0, 1, 3)])
     with open('a.pkl', 'wb') as fd:
         pickle.dump((hist, cur_policy), fd)
     # with open('thing.json', 'a+') as fd:
