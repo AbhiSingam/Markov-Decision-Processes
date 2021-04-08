@@ -478,3 +478,34 @@ Comments:
 
 
 
+### Case1:
+
+#### Diff btw standard and left from east leads to west:
+
+- IJ can now directly move from E to W to escape the attacking range of MM.
+- The major difference caused is that, instead of continuously hitting, or shooting MM at states like (E, 0, 3, R, 100), he chooses to retreat to W to avoid the attack.
+
+---
+
+### Case 2:
+
+#### Diff btw standard and stepcost of stay is 0:
+
+- IJ when placed in west now gets stuck in an infinite loop of staying at west
+- He also chooses to Stay at N, S instead of crafting/ gathering due to 0 stepcost
+- He also chooses to move left from E and C to W, where he can stay indefinitely
+
+---
+
+### Case 3
+
+#### Diff btw standard and gamma is now 0.25:
+
+- IJ now chooses to shoot from W more frequently
+- IJ now chooses to hit instead of shooting as he would with gamma = 0.999 from E
+
+- He chooses to gather more often at S, the probability of gathering is very high when MM, sometimes even resulting in an infinite loop.
+
+- He more often shoots from C when MM is at 25.
+
+- He more often chooses to STAY at N where he'd originally move DOWN

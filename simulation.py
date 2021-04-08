@@ -3,7 +3,7 @@ import random
 import numpy
 from part_2 import get_prob, positionMap
 
-with open('a.pkl', 'rb')as fd:
+with open('a3.pkl', 'rb')as fd:
     hist, histActions = pickle.load(fd)
 
 
@@ -39,7 +39,7 @@ def update_state(state, action2):
             return states[i] 
 
 # 1.(W, 0, 0, D, 100) 2.(C, 2, 0, R, 100)
-startState = (4, 0, 1, 0, 4)
+startState = (2, 2, 1, 0, 4)
 # startState = (0, 2, 0, 1, 4)
 done = False
 while not done:
