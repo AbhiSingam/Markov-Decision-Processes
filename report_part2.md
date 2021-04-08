@@ -13,7 +13,9 @@ Interpretation of the trace:
 
 - Graph for the convergence:
 
-	![graph_part2](/Users/saru/mdl/MDL_Value_Iteration/graph_part2.png)
+	![graph_part2](./graph_part2.png)
+
+	As shown in the graph, the maximum absolute difference between successive iterations  decreases.
 
 Simulations:
 
