@@ -3,9 +3,13 @@ import numpy as np
 import pickle
 import json
 import os
-from part_2 import get_prob, validActions, STEPCOST, posDic, positionMap, mstateMap
-# x = cp.Variable(shape=(2, 1), name="x")
-# A = np.array([[4, 3], [-3, 4]])
+
+TEAM_NO = 8
+STEP_ERR_ARR = [0.5, 1, 2]
+STEPCOST = -10 / STEP_ERR_ARR[TEAM_NO % 3]
+# STEPCOST = -10
+
+
 LOCATIONS = 5
 MAX_MATS = 3    # This is the maximmum number of mat values (0-2)
 MAX_ARROWS = 4  # This is the maximmum number of arrow values (0-3)
@@ -14,6 +18,170 @@ MAX_HEALTH = 5  # This is the maximmum number of monster health values (0-4) * 2
 state_to_idx = np.zeros((LOCATIONS, MAX_MATS, MAX_ARROWS, MON_STATES, MAX_HEALTH))
 idx_to_state = []
 idx_to_state_action = []
+
+positionMap = ['c', 'n', 's', 'e', 'w']
+mstateMap = ['D', 'R']
+posDic = {
+    'pos': 0,
+    'mat': 1,
+    'arrow': 2,
+    'mstate': 3,
+    'mhealth': 4,
+}
+
+def validActions(state):
+    '''state as input'''
+    ret = []
+    if state[0] == 0:
+        ret = ['UP', 'LEFT', 'DOWN', 'RIGHT', 'STAY', 'SHOOT', 'HIT']
+    elif state[0] == 1:
+        ret = ['DOWN', 'STAY', 'CRAFT']
+    elif state[0] == 2:
+        ret = ['UP', 'STAY', 'GATHER']
+    elif state[0] == 3:
+        ret = ['LEFT', 'STAY', 'SHOOT', 'HIT']
+    elif state[0] == 4:
+        ret = ['RIGHT', 'STAY', 'SHOOT']
+
+    if 'SHOOT' in ret and state[posDic['arrow']] == 0:
+        ret.remove('SHOOT')
+    if 'CRAFT' in ret and state[posDic['mat']] == 0:
+        ret.remove('CRAFT')
+    if state[posDic['mhealth']] == 0:
+        ret = ['NONE']
+
+    return ret
+
+def get_prob(state, action):
+    successState = state.copy()
+    failState = state.copy()
+    ret = [[0], [state.copy()]]
+
+    if positionMap[state[0]] == 'c':
+        if action in ['UP', 'STAY', 'DOWN', 'LEFT', 'RIGHT']:
+            endpoint = {'UP': 1, 'STAY': 0, 'DOWN': 2, 'LEFT': 4, 'RIGHT': 3}
+            successState[0] = endpoint[action]
+            failState[0] = 3
+
+            ret = [[0.85, 0.15], [successState, failState]]
+
+        if action == 'SHOOT':
+            failState[posDic['arrow']] = max(0, failState[posDic['arrow']] - 1)
+            successState[posDic['arrow']] = max(
+                0, successState[posDic['arrow']] - 1)
+            successState[posDic['mhealth']] = max(
+                0, successState[posDic['mhealth']] - 1)
+
+            ret = [[0.5, 0.5], [successState, failState]]
+
+        if action == 'HIT':
+            successState[posDic['mhealth']] = max(
+                0, successState[posDic['mhealth']] - 2)
+            ret = [[0.1, 0.9], [successState, failState]]
+
+    if positionMap[state[0]] == 'n':
+        if action in ['DOWN', 'STAY']:
+            endpoint = {'STAY': 1, 'DOWN': 0}
+            successState[posDic['pos']] = endpoint[action]
+            failState[0] = 3
+            ret = [[0.85, 0.15], [successState, failState]]
+        if action == 'CRAFT':
+            state1 = state.copy()
+            state2 = state.copy()
+            state3 = state.copy()
+
+            state1[posDic['arrow']] = min(3, state1[posDic['arrow']] + 1)
+            state2[posDic['arrow']] = min(3, state1[posDic['arrow']] + 2)
+            state3[posDic['arrow']] = min(3, state1[posDic['arrow']] + 3)
+            state1[posDic['mat']] -= 1
+            state2[posDic['mat']] -= 1
+            state3[posDic['mat']] -= 1
+            ret = [[0.5, 0.35, 0.15], [state1, state2, state3]]
+
+    if positionMap[state[0]] == 's':
+        if action in ['UP', 'STAY']:
+            endpoint = {'STAY': 2, 'UP': 0}
+            successState[posDic['pos']] = endpoint[action]
+            failState[0] = 3
+            ret = [[0.85, 0.15], [successState, failState]]
+
+        if action == 'GATHER':
+            successState[posDic['mat']] = min(
+                2, successState[posDic['mat']] + 1)
+            ret = [[0.75, 0.25], [successState, failState]]
+
+    if positionMap[state[0]] == 'e':
+        if action in ['LEFT', 'STAY']:
+            endpoint = {'STAY': 3, 'LEFT': 0}
+            successState[0] = endpoint[action]
+            ret = [[1.0], [successState]]
+
+        if action == 'SHOOT':
+            successState[posDic['arrow']] -= 1
+            failState[posDic['arrow']] -= 1
+            successState[posDic['mhealth']] -= 1
+            ret = [[0.9, 0.1], [successState, failState]]
+
+        if action == 'HIT':
+            successState[posDic['mhealth']] = max(
+                0, successState[posDic['mhealth']] - 2)
+            ret = [[0.2, 0.8], [successState, failState]]
+
+    if positionMap[state[0]] == 'w':
+        if action in ['RIGHT', 'STAY']:
+            endpoint = {'STAY': 4, 'RIGHT': 0}
+            successState[0] = endpoint[action]
+            ret = [[1.0], [successState]]
+        if action in 'SHOOT':
+
+            successState[posDic['arrow']] -= 1
+            failState[posDic['arrow']] -= 1
+            successState[posDic['mhealth']] -= 1
+            ret = [[0.25, 0.75], [successState, failState]]
+
+    if action == 'NONE':
+        ret = [[1], [state]]
+
+    if(ret == [[0], [state]]):
+        print("ACTION: ", action, " ", state)
+
+    if state[posDic['mstate']] == 0:
+        probs, states = ret
+        temp_prob = []
+        temp_state = []
+        for i, val in enumerate(probs):
+            temp_prob.append(val*0.8)
+            temp_state.append(states[i].copy())
+            rdy = states[i].copy()
+            rdy[posDic['mstate']] = 1
+            temp_prob.append(val*0.2)
+            temp_state.append(rdy.copy())
+        ret = [temp_prob, temp_state]
+
+    else:
+        probs, states = ret
+        temp_prob = []
+        temp_state = []
+        for i, val in enumerate(probs):
+            temp_prob.append(val * 0.5)
+            temp_state.append(states[i].copy())
+
+        for i, _ in enumerate(probs):
+            tState = states[i].copy()
+            if state[0] in [0, 3]:
+                tState = state.copy()
+                tState[posDic['arrow']] = 0
+                tState[posDic['mhealth']] = min(
+                    4, tState[posDic['mhealth']] + 1)
+
+            tState[posDic['mstate']] = 0
+
+            temp_prob.append(0.5 * probs[i])
+            temp_state.append(tState.copy())
+
+        ret = [temp_prob, temp_state]
+
+    return ret
 
 def get_policy(x):
     policy = []
@@ -28,27 +196,30 @@ def get_policy(x):
         # return best_action
         modified_state = list(state).copy()
         modified_state[0] = positionMap[modified_state[0]].upper()
-        modified_state[4] = modified_state[4] * 4
+        modified_state[4] = modified_state[4] * 25
         modified_state[3] = mstateMap[modified_state[3]]
         policy.append([tuple(modified_state), best_action])
     return policy
 
-def calcReward(state, prevState):
-    if prevState[posDic['mstate']] == 1 and state[posDic['mstate']] == 0 and state[0] in [0, 3] and state[posDic['mhealth']] > 0:
-        # ready
+def calcReward(prevState, state):
+    if prevState[posDic['mstate']] == 1 and state[posDic['mstate']] == 0 and prevState[0] in [0, 3] and prevState[posDic['mhealth']] > 0:
         return -40
+    # if state[4]==0 and prevState[4]>0:
+    #     return 50
 
     return 0
 
 def init_states():
     i = 0
     for state, _ in np.ndenumerate(state_to_idx):
+        # print(state)
         state_to_idx[state] = i
         idx_to_state.append(state)
         actions = validActions(state)
         for act in actions:
             idx_to_state_action.append((state, act))
         i += 1
+    # print(state_to_idx)
 
 def get_A():
     A = np.zeros((len(idx_to_state),len(idx_to_state_action)))
@@ -79,7 +250,7 @@ def get_alpha(general_case, start_state):
         return np.full((len(idx_to_state),1), 1/600)
     else:
         ret = np.zeros((len(idx_to_state),1))
-        ret[state_to_idx[start_state]][0] = 1
+        ret[int(state_to_idx[tuple(start_state)])][0] = 1
         return ret
 
 def solve(A, alpha, r):
@@ -89,7 +260,7 @@ def solve(A, alpha, r):
     problem = cp.Problem(objective, constraints)
 
     solution = problem.solve()
-    # print(solution)
+    print(solution)
 
     # print(x.value)
 
@@ -103,12 +274,21 @@ def solve(A, alpha, r):
     return x, x_list, solution
 
 if __name__ == '__main__':
-    start_state = (0,0,0,0,100)
+    start_state = (0,0,0,0,4)
     general_case = True
+    # general_case = False
     init_states()
     print(len(idx_to_state_action))
+
+    # quit()
+
     A, A_list = get_A()
+
+    with open("A_value.txt", "w") as f:
+        f.write(str(A_list))
+
     R = get_R()
+    print(A)
     alpha = get_alpha(general_case, start_state)
 
     alpha_list = []
@@ -120,6 +300,9 @@ if __name__ == '__main__':
     policy = get_policy(x)
     # print(type(list(policy)[0][0]))
     # print(type(list(x.value)[0]))
+
+    # print(alpha)
+
     to_jsonify = {
         "a" : A_list,
         "r" : list(R),

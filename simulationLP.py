@@ -1,8 +1,7 @@
 import pickle
 import random
 import numpy as np
-from part_2 import get_prob
-from part_3 import idx_to_state_action, init_states
+from part_3 import idx_to_state_action, init_states, get_prob
 
 with open('lp.pkl', 'rb')as fd:
     st_act_values = pickle.load(fd)
@@ -45,7 +44,8 @@ def get_best_action(state):
 
 
 
-startState = (4, 0, 2, 1, 4)
+startState = (4, 0, 0, 1, 1)
+# startState = start_state
 done = False
 init_states()
 while not done:

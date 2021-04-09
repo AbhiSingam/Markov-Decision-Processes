@@ -6,8 +6,8 @@ import pickle
 
 TEAM_NO = 8
 STEP_ERR_ARR = [0.5, 1, 2]
-STEPCOST = -10 / STEP_ERR_ARR[TEAM_NO % 3]
-# STEPCOST = -10
+# STEPCOST = -10 / STEP_ERR_ARR[TEAM_NO % 3]
+STEPCOST = -10
 
 GAMMA = 0.999
 DELTA = 0.001
@@ -28,29 +28,25 @@ def validActions(state):
     '''state as input'''
     ret = []
     if state[0] == 0:
-        ret = ['UP', 'LEFT', 'DOWN', 'RIGHT', 'STAY', 'SHOOT', 'HIT', 'NONE']
+        ret = ['UP', 'LEFT', 'DOWN', 'RIGHT', 'STAY', 'SHOOT', 'HIT']
     elif state[0] == 1:
-        ret = ['DOWN', 'STAY', 'NONE', 'CRAFT']
+        ret = ['DOWN', 'STAY', 'CRAFT']
     elif state[0] == 2:
-        ret = ['UP', 'STAY', 'GATHER', 'NONE']
+        ret = ['UP', 'STAY', 'GATHER']
     elif state[0] == 3:
-        ret = ['LEFT', 'SHOOT', 'HIT', 'NONE']
+        ret = ['LEFT', 'STAY', 'SHOOT', 'HIT']
     elif state[0] == 4:
-        ret = ['RIGHT', 'STAY', 'SHOOT', 'NONE']
+        ret = ['RIGHT', 'STAY', 'SHOOT']
 
-    if 'SHOOT' in ret:
-        if state[posDic['arrow']] == 0:
-            ret.remove('SHOOT')
-    if 'CRAFT' in ret:
-        if state[posDic['mat']] == 0:
-            ret.remove('CRAFT')
+    if 'SHOOT' in ret and state[posDic['arrow']] == 0:
+        ret.remove('SHOOT')
+    if 'CRAFT' in ret and state[posDic['mat']] == 0:
+        ret.remove('CRAFT')
     if state[posDic['mhealth']] == 0:
         ret = ['NONE']
 
-    if state[posDic['mhealth']] > 0 and 'NONE' in ret:
-        ret.remove('NONE')
-
     return ret
+
 
 # UTILS = np.zeros((5, 4, 3, 2, 5))
 # format: IJ state, numarrows, nummats, mmstate, mhealth
