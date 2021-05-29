@@ -10,7 +10,7 @@ STEPCOST = -10 / STEP_ERR_ARR[TEAM_NO % 3]
 # STEPCOST = -10
 
 GAMMA = 0.25
-DELTA = 0.001
+DELTA = 0.0001
 # ----
 
 positionMap = ['c', 'n', 's', 'e', 'w']
